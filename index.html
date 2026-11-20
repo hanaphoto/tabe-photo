@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b3a29">
+<title>たべフォト</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{--main:#5b3a29;--accent:#c96f3b;--bg:#f7f3ef;--card:#fff;--text:#2b211b;--muted:#7d6f64;--line:#e2d8cf;--green:#1e9e62;--yellow:#e6a817;--gray:#9aa0a6;--red:#d64545;--blue:#2f6fb2;--purple:#7a5aa0}
+body.mode-work{--main:#122a42;--accent:#f5a623;--bg:#f4f6f8;--muted:#66788a;--line:#d8e0e7}
+body.mode-travel{--main:#7a3b1e;--accent:#c96f3b;--bg:#fbf5ef;--muted:#8a7462;--line:#ecdccd}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
+header{background:var(--main);color:#fff;padding:14px 16px;padding-top:calc(12px + env(safe-area-inset-top));position:sticky;top:0;z-index:10}
+header .t{font-size:19px;font-weight:700}header .s{font-size:12px;opacity:.85;margin-top:2px}
+main{max-width:720px;margin:0 auto;padding:14px 14px 110px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);font-size:16px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--main);color:#fff;border-color:var(--main)}
+.btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.mode-work .btn.accent{color:#231a00}
+.btn.danger{color:var(--red)} .btn.small{min-height:40px;font-size:14px;padding:6px 12px}
+.btn:disabled{opacity:.45}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bar{height:10px;background:#e9e2da;border-radius:6px;overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;background:var(--green)}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.badge.req{color:#b3261e;border-color:#f0c4c0;background:#fdf0ef}
+.badge.rec{color:#7a5b00;border-color:#ecd9a0;background:#fdf6dd}
+.badge.opt{color:var(--muted)}
+.badge.mode-work{color:#122a42;background:#e8eef4}
+.badge.mode-travel{color:#7a3b1e;background:#fbeadd}
+.st{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;white-space:nowrap}
+.st.pending{background:var(--gray)} .st.shot{background:var(--yellow)} .st.confirmed{background:var(--green)} .st.retake{background:var(--red)} .st.skip{background:var(--purple)}
+input,select,textarea{width:100%;max-width:100%;min-width:0;font-size:16px;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;margin:4px 0 12px;color:var(--text)}
+input[type="date"]{-webkit-appearance:none;appearance:none;display:block;min-height:48px;text-align:left}
+input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type="date"]::-webkit-calendar-picker-indicator{margin:0;padding:0}
+label{font-size:13px;font-weight:700;color:var(--muted)}
+.note{white-space:pre-wrap;color:var(--muted);font-size:15px}
+.muted{color:var(--muted);font-size:14px}
+.hidden{display:none!important}
+h2{font-size:18px;margin:4px 0 10px} h3{font-size:16px;margin:14px 0 6px}
+.checkline{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.checkline input{width:24px;height:24px;margin:0;flex:none}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:pointer;background:#eee}
+.cathead{font-size:13px;font-weight:800;color:var(--main);margin:14px 0 4px}
+.warnbox{background:#fdf0ef;border:1px solid #f0c4c0;border-radius:10px;padding:10px 14px;font-size:14px;margin:8px 0}
+.okbox{background:#eefaf3;border:1px solid #bfe6cf;border-radius:10px;padding:10px 14px;font-size:14px;margin:8px 0}
+.modal{position:fixed;inset:0;background:rgba(10,20,30,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+.modal.open{display:flex}
+.modal .box{background:#fff;border-radius:16px;padding:20px;max-width:480px;width:100%;max-height:88vh;overflow:auto}
+/* camera overlay */
+#camOverlay{position:fixed;inset:0;background:#000;z-index:80;display:none;flex-direction:column}
+#camOverlay.open{display:flex}
+#camHead{color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:rgba(0,0,0,.65)}
+#camVideoWrap{position:relative;flex:1;overflow:hidden}
+#camVideo{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+#camGrid{position:absolute;inset:0;pointer-events:none;display:none}
+#camGrid.on{display:block}
+#camGrid:before,#camGrid:after{content:"";position:absolute;background:rgba(255,255,255,.45)}
+#camGrid:before{left:33.33%;top:0;width:1px;height:100%;box-shadow:33.33vw 0 0 rgba(255,255,255,.45)}
+#camGrid:after{top:33.33%;left:0;height:1px;width:100%;box-shadow:0 33.33vh 0 rgba(255,255,255,.45)}
+#camBar{background:rgba(0,0,0,.85);padding:12px 14px calc(14px + env(safe-area-inset-bottom))}
+#shutterBtn{width:76px;height:76px;border-radius:50%;background:#fff;border:5px solid var(--accent);cursor:pointer;flex:none}
+#shutterBtn:active{background:#ffd9c2}
+#camThumb{width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid #fff;background:#333;cursor:pointer}
+/* viewer */
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:90;display:none;flex-direction:column}
+#viewer.open{display:flex}
+#viewerImg{flex:1;object-fit:contain;width:100%;min-height:0;background:#000}
+#viewerBar{background:#111;padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
+#viewerBar .btn{background:#222;color:#fff;border-color:#444}
+#viewerBar .btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+pre.diary{white-space:pre-wrap;font-family:inherit;font-size:15px;line-height:1.8;background:#fffdf9;border:1px solid var(--line);border-radius:10px;padding:14px}
+a{color:var(--main)}
+</style>
+</head>
+<body>
+<header><div class="t">たべフォト</div><div class="s" id="hdrSub">食事処の撮影と旅の食記録</div></header>
+<main id="app"><div class="card muted">読み込み中…</div></main>
+
+<div class="modal" id="modal"><div class="box">
+<div id="modalText" style="font-size:16px;line-height:1.6"></div>
+<div class="row" style="margin-top:16px;justify-content:flex-end">
+<button class="btn" id="modalCancel">戻る</button>
+<button class="btn accent" id="modalOk">OK</button>
+</div></div></div>
+
+<!-- camera overlay -->
+<div id="camOverlay">
+  <div id="camHead">
+    <div class="spread"><strong id="camItemTitle" style="font-size:17px">項目</strong><button class="btn small" onclick="closeCamera()">閉じる</button></div>
+    <div id="camItemMeta" style="font-size:13px;opacity:.85;margin-top:2px"></div>
+  </div>
+  <div id="camVideoWrap"><video id="camVideo" autoplay playsinline muted></video><div id="camGrid"></div></div>
+  <div id="camBar">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <button class="btn small" onclick="toggleGrid()">グリッド</button>
+      <button class="btn small" onclick="flipCamera()">前後カメラ切替</button>
+      <button class="btn small" onclick="nextUnshotFromCamera()">次の未撮影へ</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <img id="camThumb" alt="直近の写真" onclick="openLastPhoto()">
+      <button id="shutterBtn" onclick="capturePhoto()" aria-label="撮影"></button>
+      <div style="width:52px;color:#fff;font-size:13px;text-align:center" id="camCount"></div>
+    </div>
+  </div>
+</div>
+
+<!-- photo viewer -->
+<div id="viewer">
+  <div style="color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 8px" class="spread"><strong id="viewerTitle">写真</strong><button class="btn small" onclick="closeViewer()">閉じる</button></div>
+  <img id="viewerImg" alt="撮影した写真">
+  <div id="viewerBar">
+    <div class="row" id="viewerMarks" style="margin-bottom:8px"></div>
+    <div class="row">
+      <button class="btn small" onclick="stepViewer(-1)">← 前</button>
+      <button class="btn small" onclick="stepViewer(1)">次 →</button>
+      <button class="btn small" onclick="downloadCurrentPhoto()">ダウンロード</button>
+      <button class="btn small danger" onclick="askDeleteCurrentPhoto()">削除</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importJsonFile" accept="application/json,.json" class="hidden">
+<input type="file" id="importPhotoFile" accept="image/*" class="hidden">
+
+<script>
+"use strict";
+/* ===== ユーティリティ ===== */
+const uid=p=>p+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad2=n=>String(n).padStart(2,"0");
+const fmtDT=ts=>ts?new Date(ts).toLocaleString("ja-JP"):"";
+const sanitizeName=s=>String(s??"").replace(/[\\\/:*?"<>|\u0000-\u001f]/g,"_").replace(/\s+/g," ").trim()||"untitled";
+const parsePrice=v=>{ const n=parseInt(String(v??"").replace(/[^0-9]/g,""),10); return isNaN(n)?0:n; };
+
+/* ===== 定数 ===== */
+const PRIO={required:"必須",recommended:"推奨",optional:"任意"};
+const ST={pending:"未撮影",shot:"撮影済み",confirmed:"確認OK",retake:"撮り直し",skip:"対象外"};
+const ST_ORDER=["pending","shot","confirmed","retake","skip"];
+const MARK={ "":"未確認", adopt:"採用", fav:"お気に入り", reject:"不採用" };
+const MEAL_TYPES=["朝","昼","夕","間食","その他"];
+const COMPANIONS=["一人","家族","友人","仕事","その他"];
+const REVISITS=["ぜひ","迷う","なし"];
+const CLOSING_DEFAULTS=["必須カット完了","写真を確認した","店名表記を確認した","書き出し（ZIP）を済ませた"];
+
+const WORK_CATS=[
+ ["外観",[["店舗正面（看板含む）","required"],["斜め前からの外観","recommended"],["入口・看板ロゴ","required"]]],
+ ["店内",[["店内全景（入口側）","required"],["店内全景（奥側）","recommended"],["カウンター席","recommended"],["テーブル席","recommended"],["個室・座敷","optional"],["内装・装飾","optional"]]],
+ ["料理",[["看板料理","required"],["おすすめ料理","required"],["定食・セット全体","recommended"],["料理アップ（寄り）","recommended"],["ドリンク","recommended"],["デザート","optional"],["季節限定","optional"]]],
+ ["メニュー",[["メニュー表紙","required"],["メニュー各ページ","recommended"],["価格表・案内","optional"]]],
+ ["人物・その他",[["店主・スタッフ","recommended"],["調理風景","recommended"],["SNS用縦構図","optional"],["横構図（バナー用余白）","optional"]]]
+];
+const TRAVEL_CATS=[
+ ["お店",[["お店の外観"],["看板・入口"],["店内の様子"],["席からの眺め"]]],
+ ["食事",[["注文した料理"],["料理アップ"],["ドリンク"],["デザート"],["メニュー表"]]],
+ ["思い出",[["一緒に食べた様子"],["お店の前で"],["レシート・会計"]]]
+];
+function templateItems(mode){
+  const cats = mode==="travel" ? TRAVEL_CATS : WORK_CATS;
+  const items=[];
+  cats.forEach(([cat,list])=>list.forEach(([title,prio])=>items.push({id:uid("item"),cat,title,priority:mode==="travel"?"optional":(prio||"optional"),status:"pending",target:"",notes:"",dish:"",price:""})));
+  return items;
+}
+
+/* ===== IndexedDB（Promiseラッパ） ===== */
+const IDB_NAME="tabephoto-v1";
+const idb={
+  db:null,
+  open(){ return new Promise((resolve,reject)=>{
+    if(idb.db) return resolve(idb.db);
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=()=>{ const db=req.result;
+      if(!db.objectStoreNames.contains("projects")) db.createObjectStore("projects",{keyPath:"id"});
+      if(!db.objectStoreNames.contains("photos")){ const s=db.createObjectStore("photos",{keyPath:"id"}); s.createIndex("projectId","projectId",{unique:false}); }
+    };
+    req.onsuccess=()=>{ idb.db=req.result; resolve(idb.db); };
+    req.onerror=()=>reject(req.error);
+  });},
+  req(r){ return new Promise((resolve,reject)=>{ r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error); }); },
+  txDone(tx){ return new Promise((resolve,reject)=>{ tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error); tx.onabort=()=>reject(tx.error); }); },
+  async all(store){ const db=await idb.open(); return idb.req(db.transaction(store,"readonly").objectStore(store).getAll()); },
+  async get(store,key){ const db=await idb.open(); return idb.req(db.transaction(store,"readonly").objectStore(store).get(key)); },
+  async put(store,val){ const db=await idb.open(); const tx=db.transaction(store,"readwrite"); tx.objectStore(store).put(val); await idb.txDone(tx); },
+  async del(store,key){ const db=await idb.open(); const tx=db.transaction(store,"readwrite"); tx.objectStore(store).delete(key); await idb.txDone(tx); },
+  async photosOf(projectId){ const db=await idb.open(); return idb.req(db.transaction("photos","readonly").objectStore("photos").index("projectId").getAll(projectId)); },
+  async countPhotos(projectId){ const db=await idb.open(); return idb.req(db.transaction("photos","readonly").objectStore("photos").index("projectId").count(projectId)); }
+};
+
+/* ===== 状態 ===== */
+let projects=[];
+let currentPhotos=[]; /* 現在開いている案件の写真（blob含む） */
+let view={name:"home",projectId:null,filter:"all"};
+const app=document.getElementById("app");
+function getProject(id){ return projects.find(p=>p.id===(id??view.projectId)); }
+async function saveProject(p){ p.updatedAt=Date.now(); await idb.put("projects",p); const i=projects.findIndex(x=>x.id===p.id); if(i>=0) projects[i]=p; else projects.push(p); }
+function photosOfItem(itemId){ return currentPhotos.filter(ph=>ph.itemId===itemId).sort((a,b)=>a.createdAt-b.createdAt); }
+async function loadPhotos(projectId){ currentPhotos = projectId ? await idb.photosOf(projectId) : []; return currentPhotos; }
+function progress(p){
+  const done=p.items.filter(s=>s.status==="shot"||s.status==="confirmed").length;
+  const req=p.items.filter(s=>s.priority==="required");
+  const reqDone=req.filter(s=>s.status==="shot"||s.status==="confirmed").length;
+  return {total:p.items.length,done,reqTotal:req.length,reqDone,pct:p.items.length?Math.round(done/p.items.length*100):0,
+    reqLeft:req.filter(s=>s.status==="pending"),retake:p.items.filter(s=>s.status==="retake")};
+}
+function applyTheme(p){ document.body.classList.remove("mode-work","mode-travel"); if(p) document.body.classList.add(p.mode==="travel"?"mode-travel":"mode-work"); }
+
+/* ===== 画面遷移 ===== */
+function go(name,projectId){ view={name,projectId:projectId??view.projectId,filter:view.filter||"all"}; render(); window.scrollTo(0,0); }
+async function render(){
+  const p = view.name==="home" ? null : getProject();
+  applyTheme(p);
+  document.getElementById("hdrSub").textContent = view.name==="home" ? "食事処の撮影と旅の食記録" : ((p?(p.mode==="travel"?"旅記録モード":"業務モード"):"")+(p&&p.title?"｜"+p.title:""));
+  if(view.name==="home") return vHome();
+  if(!p) { view.name="home"; return vHome(); }
+  if(view.name!=="home" && (!currentPhotos.length || (currentPhotos[0]&&currentPhotos[0].projectId!==p.id) || window._photosFor!==p.id)){ await loadPhotos(p.id); window._photosFor=p.id; }
+  ({edit:vEdit,detail:vDetail,closing:vClosing,diary:vDiary}[view.name]||vDetail)();
+}
+
+/* ===== HOME ===== */
+async function vHome(){
+  const list=[...projects].sort((a,b)=>b.updatedAt-a.updatedAt);
+  const counts={};
+  for(const p of list){ counts[p.id]=await idb.countPhotos(p.id).catch(()=>0); }
+  app.innerHTML=`
+  <div class="row" style="margin-bottom:12px">
+    <button class="btn primary" onclick="createProject('work')">＋ 業務撮影の案件</button>
+    <button class="btn accent" onclick="createProject('travel')">＋ 旅記録を追加</button>
+    <button class="btn" onclick="exportJSON()">JSON書き出し</button>
+    <button class="btn" onclick="document.getElementById('importJsonFile').click()">JSON読み込み</button>
+    <a class="btn" href="manual.html">説明書</a>
+  </div>
+  <div class="card muted">JSON読み込みで復元できるのは案件情報と項目だけです。<strong>写真は復元されません</strong>（写真込みのバックアップは、各案件のZIP書き出しを使ってください）。読み込んだ案件は既存の案件を消さずに追加されます。</div>
+  ${list.length?"":'<div class="card muted">案件がまだありません。「業務撮影の案件」か「旅記録を追加」から始めてください。</div>'}
+  ${list.map(p=>{const pr=progress(p);return `<div class="card">
+    <div class="spread"><strong style="font-size:17px">${esc(p.title||"（店名未入力）")}</strong><span class="badge ${p.mode==="travel"?"mode-travel":"mode-work"}">${p.mode==="travel"?"旅記録":"業務"}</span></div>
+    <div class="muted">${esc(p.date)} ${esc(p.place)}${p.mode==="travel"&&p.tripName?` ・ ${esc(p.tripName)}`:""}${p.mode==="travel"&&p.mealType?` ・ ${esc(p.mealType)}`:""} ・ 写真 ${counts[p.id]||0}枚</div>
+    <div class="bar"><i style="width:${pr.pct}%"></i></div>
+    <div class="muted">撮影済み以上 ${pr.done}/${pr.total}${p.mode==="work"?` ・ 必須 ${pr.reqDone}/${pr.reqTotal}`:""}${pr.retake.length?` ・ 撮り直し ${pr.retake.length}`:""} ・ ${p.status==="done"?"完了":"進行中"}</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn accent small" onclick="go('detail','${p.id}')">開く（項目と撮影）</button>
+      <button class="btn small" onclick="go('edit','${p.id}')">編集</button>
+      ${p.mode==="travel"?`<button class="btn small" onclick="go('diary','${p.id}')">日記</button>`:`<button class="btn small" onclick="go('closing','${p.id}')">撮影終了チェック</button>`}
+      <button class="btn small" onclick="duplicateProject('${p.id}')">複製</button>
+    </div></div>`}).join("")}`;
+}
+async function createProject(mode){
+  const p={id:uid("project"),mode,title:"",date:today(),place:"",tripName:"",mealType:mode==="travel"?"昼":"",companion:mode==="travel"?"一人":"",genre:mode==="work"?"飲食店":"",notes:"",rating:0,revisit:"",impression:"",status:"active",createdAt:Date.now(),updatedAt:Date.now(),
+    items:templateItems(mode),closingChecks:CLOSING_DEFAULTS.map((l,i)=>({id:"check_"+(i+1),label:l,done:false}))};
+  await saveProject(p); go("edit",p.id);
+}
+async function duplicateProject(id){
+  const src=getProject(id); if(!src) return;
+  const p=JSON.parse(JSON.stringify(src));
+  p.id=uid("project"); p.title=(src.title||"")+"（複製）"; p.status="active"; p.createdAt=Date.now(); p.updatedAt=Date.now();
+  p.items.forEach(s=>{ s.id=uid("item"); s.status="pending"; });
+  (p.closingChecks||[]).forEach(c=>c.done=false);
+  await saveProject(p); render();
+  showInfo("複製しました。写真は複製されません（項目リストの使い回し用です）。");
+}
+async function askDeleteProject(){
+  showModal("この案件を削除しますか？撮影した写真もすべて削除されます。この操作は戻せません。","削除する",async()=>{
+    const id=view.projectId;
+    const photos=await idb.photosOf(id).catch(()=>[]);
+    for(const ph of photos) await idb.del("photos",ph.id);
+    await idb.del("projects",id);
+    projects=projects.filter(p=>p.id!==id); currentPhotos=[]; window._photosFor=null;
+    go("home");
+  });
+}
+
+/* ===== 編集 ===== */
+function vEdit(){
+  const p=getProject(); if(!p) return go("home");
+  const isT=p.mode==="travel";
+  app.innerHTML=`
+  <button class="btn small" onclick="go('home')">← 案件一覧</button>
+  <div class="card" style="margin-top:12px"><h2>${isT?"旅記録の編集":"案件の編集"} <span class="badge ${isT?"mode-travel":"mode-work"}">${isT?"旅記録":"業務"}</span></h2>
+    <label>店名（必須）</label><input id="fTitle" value="${esc(p.title)}" placeholder="例：○○食堂">
+    <label>日付</label><input id="fDate" type="date" value="${esc(p.date)}">
+    <label>場所（住所テキスト）</label><input id="fPlace" value="${esc(p.place)}">
+    ${isT?`
+    <label>旅行名</label><input id="fTrip" value="${esc(p.tripName)}" placeholder="例：天草帰省 2026">
+    <label>食事区分</label><select id="fMeal">${MEAL_TYPES.map(m=>`<option ${p.mealType===m?"selected":""}>${m}</option>`).join("")}</select>
+    <label>同行者</label><select id="fCompanion">${COMPANIONS.map(m=>`<option ${p.companion===m?"selected":""}>${m}</option>`).join("")}</select>
+    <label>星評価</label><select id="fRating">${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${Number(p.rating)===n?"selected":""}>${n===0?"未評価":"★".repeat(n)+"☆".repeat(5-n)}</option>`).join("")}</select>
+    <label>再訪したいか</label><select id="fRevisit"><option value="">未選択</option>${REVISITS.map(m=>`<option ${p.revisit===m?"selected":""}>${m}</option>`).join("")}</select>
+    <label>感想</label><textarea id="fImpression" rows="3">${esc(p.impression)}</textarea>`
+    :`<label>ジャンル</label><input id="fGenre" value="${esc(p.genre)}">`}
+    <label>メモ</label><textarea id="fNotes" rows="2">${esc(p.notes)}</textarea>
+    <div class="row"><button class="btn primary" onclick="saveProjectForm()">保存する</button>
+    <button class="btn" onclick="resetTemplate()">テンプレートを入れ直す</button>
+    <button class="btn danger" onclick="askDeleteProject()">案件を削除</button></div>
+    <div class="muted" style="margin-top:6px">「テンプレートを入れ直す」と、項目が初期セットに戻ります（写真が付いた項目も消えます）。</div>
+  </div>
+  <div class="card"><h2>項目（${p.items.length}件）</h2>
+    ${p.items.map((s,i)=>`<div class="checkline"><div style="flex:1">
+      <strong>${i+1}. ${esc(s.title)}</strong> <span class="muted">${esc(s.cat)}</span>
+      ${p.mode==="work"?`<span class="badge ${s.priority==="required"?"req":s.priority==="recommended"?"rec":"opt"}">${PRIO[s.priority]}</span>`:""}
+      <span class="st ${s.status}">${ST[s.status]}</span>
+      ${s.notes?`<div class="muted">${esc(s.notes)}</div>`:""}${s.dish?`<div class="muted">料理名：${esc(s.dish)}${s.price?` ／ ${esc(s.price)}`:""}</div>`:""}
+      </div>
+      <button class="btn small" onclick="moveItem(${i},-1)" ${i===0?"disabled":""}>↑</button>
+      <button class="btn small" onclick="moveItem(${i},1)" ${i===p.items.length-1?"disabled":""}>↓</button>
+      <button class="btn small" onclick="editItem(${i})">編集</button>
+      <button class="btn small danger" onclick="deleteItem(${i})">削除</button></div>`).join("")}
+    <div id="itemForm"></div>
+    <button class="btn" style="margin-top:10px" onclick="editItem(-1)">＋ 項目を追加</button>
+  </div>`;
+}
+async function saveProjectForm(){
+  const p=getProject(); if(!p) return;
+  const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
+  p.title=v("fTitle").trim(); p.date=v("fDate"); p.place=v("fPlace"); p.notes=v("fNotes");
+  if(p.mode==="travel"){ p.tripName=v("fTrip"); p.mealType=v("fMeal"); p.companion=v("fCompanion"); p.rating=Number(v("fRating")||0); p.revisit=v("fRevisit"); p.impression=v("fImpression"); }
+  else { p.genre=v("fGenre"); }
+  await saveProject(p); render(); showInfo("保存しました。");
+}
+async function resetTemplate(){
+  const p=getProject(); if(!p) return;
+  showModal("項目をテンプレートの初期セットに入れ直しますか？今の項目と、その項目に付いた写真は削除されます。","入れ直す",async()=>{
+    for(const ph of [...currentPhotos]) await idb.del("photos",ph.id);
+    currentPhotos=[]; p.items=templateItems(p.mode); await saveProject(p); render();
+  });
+}
+async function moveItem(i,d){ const p=getProject(); const j=i+d; if(j<0||j>=p.items.length) return; [p.items[i],p.items[j]]=[p.items[j],p.items[i]]; await saveProject(p); render(); }
+async function deleteItem(i){
+  const p=getProject(); const item=p.items[i]; if(!item) return;
+  for(const ph of photosOfItem(item.id)) { await idb.del("photos",ph.id); }
+  currentPhotos=currentPhotos.filter(ph=>ph.itemId!==item.id);
+  p.items.splice(i,1); await saveProject(p); render();
+}
+function editItem(i){
+  const p=getProject(); const s=i>=0?p.items[i]:{cat:"",title:"",priority:"optional",target:"",notes:"",dish:"",price:""};
+  const cats=[...new Set(p.items.map(x=>x.cat).concat(p.mode==="travel"?TRAVEL_CATS.map(c=>c[0]):WORK_CATS.map(c=>c[0])))];
+  document.getElementById("itemForm").innerHTML=`<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+    <label>カテゴリ</label><input id="sCat" list="catList" value="${esc(s.cat)}"><datalist id="catList">${cats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
+    <label>項目名</label><input id="sTitle" value="${esc(s.title)}">
+    ${p.mode==="work"?`<label>優先度</label><select id="sPrio">${Object.entries(PRIO).map(([k,v])=>`<option value="${k}" ${s.priority===k?"selected":""}>${v}</option>`).join("")}</select>
+    <label>目標枚数（任意）</label><input id="sTarget" type="number" min="0" value="${esc(s.target||"")}">`:""}
+    ${p.mode==="travel"?`<label>料理名</label><input id="sDish" value="${esc(s.dish||"")}">
+    <label>価格</label><input id="sPrice" inputmode="numeric" value="${esc(s.price||"")}" placeholder="例：1200">`:""}
+    <label>メモ</label><input id="sNotes" value="${esc(s.notes||"")}">
+    <div class="row"><button class="btn primary small" onclick="saveItem(${i})">この項目を保存</button></div></div>`;
+  document.getElementById("sTitle").focus();
+}
+async function saveItem(i){
+  const p=getProject(); const title=document.getElementById("sTitle").value.trim(); if(!title){ showInfo("項目名を入れてください。"); return; }
+  const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
+  const data={cat:v("sCat").trim()||"その他",title,notes:v("sNotes")};
+  if(p.mode==="work"){ data.priority=v("sPrio"); data.target=v("sTarget"); }
+  if(p.mode==="travel"){ data.dish=v("sDish"); data.price=v("sPrice"); data.priority="optional"; }
+  if(i>=0) Object.assign(p.items[i],data);
+  else p.items.push({id:uid("item"),status:"pending",target:"",dish:"",price:"",priority:"optional",...data});
+  await saveProject(p); render();
+}
+
+/* ===== 項目一覧・撮影（詳細） ===== */
+let wakeLock=null;
+async function keepAwake(){ try{ if("wakeLock" in navigator) wakeLock=await navigator.wakeLock.request("screen"); }catch(e){} }
+function vDetail(){
+  const p=getProject(); if(!p) return go("home");
+  keepAwake();
+  const pr=progress(p); const f=view.filter||"all";
+  const items=p.items.map((s,i)=>({s,i})).filter(({s})=> f==="all"?true : f==="pending"?s.status==="pending" : f==="retake"?s.status==="retake":true);
+  let lastCat=null; let body="";
+  for(const {s,i} of items){
+    if(s.cat!==lastCat){ body+=`<div class="cathead">${esc(s.cat)}</div>`; lastCat=s.cat; }
+    const phs=photosOfItem(s.id);
+    body+=`<div class="card" style="margin-bottom:8px">
+      <div class="spread"><strong>${i+1}. ${esc(s.title)}</strong><button class="st ${s.status}" style="border:0;min-height:40px;cursor:pointer" onclick="cycleStatus('${s.id}')">${ST[s.status]}</button></div>
+      <div style="margin-top:4px">${p.mode==="work"?`<span class="badge ${s.priority==="required"?"req":s.priority==="recommended"?"rec":"opt"}">${PRIO[s.priority]}</span> `:""}<span class="muted">写真 ${phs.length}枚${s.target?` / 目標 ${esc(s.target)}枚`:""}${phs.length?` ・ 採用 ${phs.filter(x=>x.mark==="adopt"||x.mark==="fav").length}枚`:""}</span></div>
+      ${s.dish?`<div class="muted">料理名：${esc(s.dish)}${s.price?` ／ ${esc(s.price)}`:""}</div>`:""}
+      ${s.notes?`<div class="note">${esc(s.notes)}</div>`:""}
+      ${phs.length?`<div class="thumbs">${phs.map(ph=>`<img src="${thumbUrl(ph)}" alt="写真" onclick="openViewer('${ph.id}')">`).join("")}</div>`:""}
+      <div class="row" style="margin-top:10px">
+        <button class="btn accent small" onclick="openCamera('${s.id}')">📷 カメラで撮る</button>
+        <button class="btn small" onclick="pickPhoto('${s.id}')">写真を取り込む</button>
+        <button class="btn small" onclick="go('edit','${p.id}')">項目を編集</button>
+      </div></div>`;
+  }
+  app.innerHTML=`
+  <button class="btn small" onclick="go('home')">← 案件一覧</button>
+  <div class="card" style="margin-top:12px">
+    <div class="spread"><strong style="font-size:17px">${esc(p.title||"（店名未入力）")}</strong><span class="badge ${p.mode==="travel"?"mode-travel":"mode-work"}">${p.mode==="travel"?"旅記録":"業務"}</span></div>
+    <div class="muted">${esc(p.date)} ${esc(p.place)}${p.mode==="travel"&&p.tripName?` ・ ${esc(p.tripName)}`:""}${p.mode==="travel"&&p.mealType?` ・ ${esc(p.mealType)}`:""} ・ 写真合計 ${currentPhotos.length}枚</div>
+    <div class="bar"><i style="width:${pr.pct}%"></i></div>
+    <div class="muted">撮影済み以上 ${pr.done}/${pr.total}（${pr.pct}%）${p.mode==="work"?` ・ 必須 ${pr.reqDone}/${pr.reqTotal}`:""}${pr.retake.length?` ・ 撮り直し ${pr.retake.length}件`:""}</div>
+    <div class="row" style="margin-top:10px">
+      ${[["all","すべて"],["pending","未撮影"],["retake","撮り直し"]].map(([k,v])=>`<button class="btn small ${f===k?"primary":""}" onclick="setFilter('${k}')">${v}</button>`).join("")}
+      <button class="btn small" onclick="go('edit','${p.id}')">編集</button>
+      ${p.mode==="travel"?`<button class="btn small" onclick="go('diary','${p.id}')">日記を見る</button>`:`<button class="btn small" onclick="go('closing','${p.id}')">撮影終了チェック・書き出し</button>`}
+    </div>
+    <div class="muted" style="margin-top:6px">状態バッジを押すと 未撮影→撮影済み→確認OK→撮り直し→対象外 の順に切り替わります。カメラで撮ると自動で「撮影済み」になります。</div>
+  </div>
+  ${body||'<div class="card muted">該当する項目はありません。</div>'}
+  <div class="card"><h2>書き出し</h2>
+    <div class="row">
+      <button class="btn primary" onclick="exportZIP()">ZIP書き出し（写真込み）</button>
+      <button class="btn" onclick="exportCSV()">CSV書き出し</button>
+      <button class="btn" onclick="exportJSON()">JSON書き出し</button>
+    </div>
+    <div class="muted" style="margin-top:6px">ZIPには写真（採用/未確認/不採用のフォルダ分け）・撮影一覧.csv・記録.json${p.mode==="travel"?"・日記.txt":""} が入ります。JSONは案件情報と項目だけです（写真は含まれません）。</div>
+  </div>`;
+}
+function setFilter(f){ view.filter=f; render(); }
+async function cycleStatus(id){
+  const p=getProject(); const s=p.items.find(x=>x.id===id); if(!s) return;
+  s.status=ST_ORDER[(ST_ORDER.indexOf(s.status)+1)%ST_ORDER.length];
+  await saveProject(p); render();
+}
+const _thumbUrls={};
+function thumbUrl(ph){ if(!_thumbUrls[ph.id]) _thumbUrls[ph.id]=URL.createObjectURL(ph.blob); return _thumbUrls[ph.id]; }
+
+/* ===== 写真の取り込み（フォールバック） ===== */
+let importPhotoItemId=null;
+function pickPhoto(itemId){ importPhotoItemId=itemId; document.getElementById("importPhotoFile").click(); }
+document.getElementById("importPhotoFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f||!importPhotoItemId) return;
+  const p=getProject(); if(!p) return;
+  await storePhoto(p,importPhotoItemId,f);
+  importPhotoItemId=null; render();
+});
+async function storePhoto(p,itemId,blob){
+  const photo={id:uid("photo"),projectId:p.id,itemId,blob,createdAt:Date.now(),mark:""};
+  await idb.put("photos",photo);           /* 保存成功後に初めて撮影済みにする */
+  currentPhotos.push(photo);
+  const item=p.items.find(x=>x.id===itemId);
+  if(item && (item.status==="pending"||item.status==="retake")){ item.status="shot"; await saveProject(p); }
+  return photo;
+}
+
+/* ===== カメラ ===== */
+const cam={stream:null,itemId:null,facing:"environment",grid:false,lastPhotoId:null};
+function camItem(){ const p=getProject(); return p?p.items.find(x=>x.id===cam.itemId):null;}
+async function openCamera(itemId){
+const p=getProject(); if(!p) return;
+cam.itemId=itemId;
+document.getElementById("camOverlay").classList.add("open");
+updateCamHead();
+await startStream();
+}
+async function startStream(){
+stopStream();
+const video=document.getElementById("camVideo");
+try{
+cam.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cam.facing},width:{ideal:1920},height:{ideal:1080}},audio:false});
+video.srcObject=cam.stream;
+}catch(e){
+document.getElementById("camOverlay").classList.remove("open");
+showInfo("カメラを起動できませんでした。ブラウザのカメラ許可を確認するか、「写真を取り込む」を使ってください。");
+}
+}
+function stopStream(){ if(cam.stream){ cam.stream.getTracks().forEach(t=>t.stop()); cam.stream=null;}}
+function closeCamera(){ stopStream(); document.getElementById("camOverlay").classList.remove("open"); render();}
+function updateCamHead(){
+const p=getProject(); const item=camItem(); if(!p||!item) return;
+const phs=photosOfItem(item.id);
+document.getElementById("camItemTitle").textContent=item.title;
+document.getElementById("camItemMeta").textContent=(item.cat||"")+" ・ "+(ST[item.status]||"")+(p.mode==="travel"&&item.dish?" ・ "+item.dish:"");
+document.getElementById("camCount").textContent=phs.length+(item.target?"/"+item.target:"")+"枚";
+const last=phs[phs.length-1];
+if(last){ cam.lastPhotoId=last.id; document.getElementById("camThumb").src=thumbUrl(last);}
+}
+function toggleGrid(){ cam.grid=!cam.grid; document.getElementById("camGrid").classList.toggle("on",cam.grid);}
+async function flipCamera(){ cam.facing = cam.facing==="environment"? "user": "environment"; await startStream();}
+function nextUnshotFromCamera(){
+const p=getProject(); if(!p) return;
+const nxt=p.items.find(x=>(x.status==="pending"||x.status==="retake")&&x.id!==cam.itemId) || p.items.find(x=>x.status==="pending"||x.status==="retake");
+if(!nxt){ showInfo("未撮影・撮り直しの項目はありません。"); return;}
+cam.itemId=nxt.id; updateCamHead();
+}
+function capturePhoto(){
+const p=getProject(); const item=camItem(); const video=document.getElementById("camVideo");
+if(!p||!item||!video.videoWidth) return;
+const MAX=1920; let w=video.videoWidth,h=video.videoHeight;
+const scale=Math.min(1,MAX/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale);
+const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+cv.getContext("2d").drawImage(video,0,0,w,h);
+cv.toBlob(async blob=>{
+if(!blob){ showInfo("撮影に失敗しました。もう一度お試しください。"); return;}
+try{
+const photo=await storePhoto(p,item.id,blob);
+cam.lastPhotoId=photo.id;
+document.getElementById("camThumb").src=thumbUrl(photo);
+updateCamHead();
+}catch(e){ showInfo("写真の保存に失敗しました。端末の空き容量を確認してください。");}
+},"image/jpeg",0.92);
+}
+function openLastPhoto(){ if(cam.lastPhotoId) openViewer(cam.lastPhotoId);}
+
+/* ===== 写真ビューア ===== */
+const viewer={photoId:null};
+function viewerList(){ const ph=currentPhotos.find(x=>x.id===viewer.photoId); if(!ph) return currentPhotos; return photosOfItem(ph.itemId);}
+function openViewer(photoId){
+viewer.photoId=photoId;
+document.getElementById("viewer").classList.add("open");
+drawViewer();
+}
+function closeViewer(){ document.getElementById("viewer").classList.remove("open"); if(document.getElementById("camOverlay").classList.contains("open")) updateCamHead(); else render();}
+function drawViewer(){
+const ph=currentPhotos.find(x=>x.id===viewer.photoId); if(!ph){ closeViewer(); return;}
+const p=getProject(); const item=p?p.items.find(x=>x.id===ph.itemId):null;
+const list=viewerList(); const idx=list.findIndex(x=>x.id===ph.id);
+document.getElementById("viewerTitle").textContent=(item?item.title:"写真")+`（${idx+1}/${list.length}） `+fmtDT(ph.createdAt);
+document.getElementById("viewerImg").src=thumbUrl(ph);
+document.getElementById("viewerMarks").innerHTML=
+[["adopt","採用"],["fav","お気に入り"],["reject","不採用"],["","未確認"]].map(([k,v])=>`<button class="btn small ${ph.mark===k?"on":""}" onclick="setPhotoMark('${k}')">${v}</button>`).join("")+
+`<span style="color:#fff;font-size:13px">状態：${item?ST[item.status]:""}</span>`;
+}
+function stepViewer(d){ const list=viewerList(); const i=list.findIndex(x=>x.id===viewer.photoId); const n=list[i+d]; if(n){ viewer.photoId=n.id; drawViewer();}}
+async function setPhotoMark(mark){
+const ph=currentPhotos.find(x=>x.id===viewer.photoId); if(!ph) return;
+ph.mark=mark; await idb.put("photos",ph); drawViewer();
+}
+function downloadCurrentPhoto(){
+const ph=currentPhotos.find(x=>x.id===viewer.photoId); if(!ph) return;
+const p=getProject(); downloadBlob(ph.blob, photoFileName(p,ph,1));
+}
+function askDeleteCurrentPhoto(){
+showModal("この写真を削除しますか？この操作は戻せません。","削除する",async()=>{
+const ph=currentPhotos.find(x=>x.id===viewer.photoId); if(!ph) return;
+const list=viewerList(); const i=list.findIndex(x=>x.id===ph.id);
+await idb.del("photos",ph.id);
+currentPhotos=currentPhotos.filter(x=>x.id!==ph.id);
+delete _thumbUrls[ph.id];
+const nxt=list[i+1]||list[i-1];
+if(nxt){ viewer.photoId=nxt.id; drawViewer();} else closeViewer();
+});
+}
+function photoFileName(p,ph,seq){
+const item=p?p.items.find(x=>x.id===ph.itemId):null;
+const itemIdx=item?p.items.indexOf(item)+1:0;
+const sameItem=p?currentPhotos.filter(x=>x.itemId===ph.itemId).sort((a,b)=>a.createdAt-b.createdAt):[];
+const n=sameItem.findIndex(x=>x.id===ph.id)+1||seq;
+const d=(p&&p.date?p.date:today()).replace(/-/g,"");
+return `${d}_${pad2(itemIdx)}_${sanitizeName(item?item.title:"photo")}_${pad2(n)}.jpg`;
+}
+
+/* ===== 撮影終了チェック（work）・書き出し画面 ===== */
+function vClosing(){
+const p=getProject(); if(!p) return go("home");
+if(!p.closingChecks||!p.closingChecks.length) p.closingChecks=CLOSING_DEFAULTS.map((l,i)=>({id:"check_"+(i+1),label:l,done:false}));
+const pr=progress(p);
+const unconfirmed=currentPhotos.filter(ph=>!ph.mark).length;
+const leftReq=pr.reqLeft.length, leftRetake=pr.retake.length;
+app.innerHTML=`
+<button class="btn small" onclick="go('detail','${p.id}')">← 項目一覧</button>
+<div class="card" style="margin-top:12px"><h2>撮影終了チェック</h2>
+${leftReq||leftRetake||unconfirmed?`<div class="warnbox"><strong>残りがあります：</strong><br>必須の未撮影 ${leftReq}件 ・ 撮り直し ${leftRetake}件 ・ 未確認の写真 ${unconfirmed}枚</div>`:`<div class="okbox">必須の未撮影・撮り直しはなく、写真はすべて確認済みです。</div>`}
+${pr.reqLeft.length?`<div>${pr.reqLeft.map(s=>`<div>・${esc(s.title)} <span class="badge req">必須・未撮影</span></div>`).join("")}</div>`:""}
+${pr.retake.length?`<div>${pr.retake.map(s=>`<div>・${esc(s.title)} <span class="st retake">撮り直し</span></div>`).join("")}</div>`:""}
+${p.closingChecks.map((c,i)=>`<label class="checkline"><input type="checkbox" ${c.done?"checked":""} onchange="toggleCheck(${i},this.checked)"><span>${esc(c.label)}</span></label>`).join("")}
+</div>
+<div class="card"><h2>書き出し・完了</h2>
+<div class="row">
+<button class="btn primary" onclick="exportZIP()">ZIP書き出し（写真込み）</button>
+<button class="btn" onclick="exportCSV()">CSV書き出し</button>
+<button class="btn" onclick="exportJSON()">JSON書き出し</button>
+<button class="btn accent" onclick="completeProject()">案件を完了にする</button>
+</div>
+<div class="muted" style="margin-top:8px">状態：${p.status==="done"?"完了":"進行中"} ・ 写真合計 ${currentPhotos.length}枚（未確認 ${unconfirmed}枚）</div>
+</div>`;
+}
+async function toggleCheck(i,v){ const p=getProject(); p.closingChecks[i].done=v; await saveProject(p);}
+function completeProject(){
+const p=getProject(); const pr=progress(p);
+if(pr.reqLeft.length>0||pr.retake.length>0){
+showModal(`必須の未撮影 ${pr.reqLeft.length}件、撮り直し ${pr.retake.length}件が残っています。それでも案件を完了にしますか？`,"完了にする",async()=>{ p.status="done"; await saveProject(p); go("home");});
+} else { p.status="done"; saveProject(p).then(()=>go("home"));}
+}
+
+/* ===== 日記（travel） ===== */
+function buildDiary(p){
+const dishes=p.items.filter(s=>s.dish);
+const total=p.items.reduce((a,s)=>a+parsePrice(s.price),0);
+const stars=p.rating?("★".repeat(p.rating)+"☆".repeat(5-p.rating)):"未評価";
+const dishText=dishes.length?dishes.map(s=>s.dish+(s.price?`（${s.price}）`:"")).join("、"):"（料理名は未記入）";
+const lines=[];
+lines.push(`${p.title||"（店名未入力）"}`);
+if(p.tripName) lines.push(`旅行：${p.tripName}`);
+lines.push(`日付：${p.date||""}${p.mealType?`（${p.mealType}）`:""}${p.companion?` ・ 同行者：${p.companion}`:""}`);
+if(p.place) lines.push(`場所：${p.place}`);
+lines.push(`食べたもの：${dishText}`);
+if(total) lines.push(`合計金額：${total.toLocaleString("ja-JP")}円`);
+lines.push(`評価：${stars}${p.rating?`（${p.rating}/5）`:""}`);
+if(p.revisit) lines.push(`再訪：${p.revisit}`);
+lines.push("");
+const sentence=`${p.date||""}、${p.tripName?`${p.tripName}で訪れた`:"訪れた"}「${p.title||"お店"}」${p.place?`（${p.place}）`:""}で${p.mealType?`${p.mealType}に`:""}${dishText}を食べた。${total?`合計は${total.toLocaleString("ja-JP")}円。`:""}評価は${stars}。${p.revisit?`再訪は「${p.revisit}」。`:""}${p.impression||""}`;
+lines.push(sentence);
+if(p.notes){ lines.push(""); lines.push(`メモ：${p.notes}`);}
+return lines.join("\n");
+}
+function vDiary(){
+const p=getProject(); if(!p) return go("home");
+const text=buildDiary(p);
+app.innerHTML=`
+<button class="btn small" onclick="go('detail','${p.id}')">← 項目一覧</button>
+<div class="card" style="margin-top:12px"><h2>旅の日記テキスト</h2>
+<pre class="diary" id="diaryText">${esc(text)}</pre>
+<div class="row">
+<button class="btn primary" onclick="copyDiary()">コピーする</button>
+<button class="btn" onclick="downloadDiary()">日記.txtをダウンロード</button>
+<button class="btn" onclick="exportZIP()">ZIP書き出し（日記入り）</button>
+<button class="btn" onclick="go('edit','${p.id}')">記録を編集</button>
+</div>
+<div class="muted" style="margin-top:6px">店名・料理名・価格・評価・感想は「編集」から入れられます。日記は自動で文章化されます。</div>
+</div>`;
+}
+async function copyDiary(){
+const p=getProject(); const text=buildDiary(p);
+try{ await navigator.clipboard.writeText(text); showInfo("日記をコピーしました。");}
+catch(e){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); showInfo("日記をコピーしました。");}catch(_){ showInfo("コピーできませんでした。画面のテキストを長押しでコピーしてください。");} ta.remove();}
+}
+function downloadDiary(){ const p=getProject(); downloadBlob(new Blob([buildDiary(p)],{type:"text/plain;charset=utf-8"}), sanitizeName((p.tripName||"tabi")+"_"+(p.title||"diary"))+".txt");}
+
+// === ZIP-BEGIN === （store方式・無圧縮。ブラウザ依存のない純関数群：Node検証用マーカー）
+const CRC_TABLE=(()=>{ const t=new Int32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c; } return t; })();
+function crc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function utf8Bytes(str){ return new TextEncoder().encode(str); }
+function dosDateTime(date){
+  const d=date||new Date();
+  const time=((d.getHours()&31)<<11)|((d.getMinutes()&63)<<5)|((Math.floor(d.getSeconds()/2))&31);
+  const dt=(((Math.max(0,d.getFullYear()-1980))&127)<<9)|(((d.getMonth()+1)&15)<<5)|(d.getDate()&31);
+  return {time, date:dt};
+}
+function zipStore(entries, date){
+  /* entries: [{name: string(UTF-8可), data: Uint8Array}] → Uint8Array (ZIP, store, UTF-8 flag) */
+  const enc=new TextEncoder(); const dt=dosDateTime(date);
+  const chunks=[]; const centrals=[]; let offset=0;
+  const u16=n=>new Uint8Array([n&255,(n>>>8)&255]);
+  const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
+  const push=(arr,u8)=>{ arr.push(u8); };
+  for(const e of entries){
+    const nameB=enc.encode(e.name); const data=e.data instanceof Uint8Array?e.data:new Uint8Array(e.data);
+    const crc=crc32(data); const localOffset=offset;
+    const local=new Uint8Array(30+nameB.length);
+    const lv=new DataView(local.buffer);
+    lv.setUint32(0,0x04034b50,true); lv.setUint16(4,20,true); lv.setUint16(6,0x0800,true); lv.setUint16(8,0,true);
+    lv.setUint16(10,dt.time,true); lv.setUint16(12,dt.date,true); lv.setUint32(14,crc,true);
+    lv.setUint32(18,data.length,true); lv.setUint32(22,data.length,true); lv.setUint16(26,nameB.length,true); lv.setUint16(28,0,true);
+    local.set(nameB,30);
+    push(chunks,local); push(chunks,data); offset+=local.length+data.length;
+    const cen=new Uint8Array(46+nameB.length); const cv=new DataView(cen.buffer);
+    cv.setUint32(0,0x02014b50,true); cv.setUint16(4,20,true); cv.setUint16(6,20,true); cv.setUint16(8,0x0800,true); cv.setUint16(10,0,true);
+    cv.setUint16(12,dt.time,true); cv.setUint16(14,dt.date,true); cv.setUint32(16,crc,true);
+    cv.setUint32(20,data.length,true); cv.setUint32(24,data.length,true); cv.setUint16(28,nameB.length,true);
+    cv.setUint32(42,localOffset,true); cen.set(nameB,46);
+    centrals.push(cen);
+  }
+  let cenSize=0; for(const c of centrals) cenSize+=c.length;
+  const end=new Uint8Array(22); const ev=new DataView(end.buffer);
+  ev.setUint32(0,0x06054b50,true); ev.setUint16(8,entries.length,true); ev.setUint16(10,entries.length,true);
+  ev.setUint32(12,cenSize,true); ev.setUint32(16,offset,true);
+  const total=offset+cenSize+22; const out=new Uint8Array(total); let pos=0;
+  for(const c of chunks){ out.set(c,pos); pos+=c.length; }
+  for(const c of centrals){ out.set(c,pos); pos+=c.length; }
+  out.set(end,pos);
+  return out;
+}
+// === ZIP-END ===
+
+/* ===== ダウンロード／共有 ===== */
+function downloadBlob(blob,filename){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function download(name,text,type){ downloadBlob(new Blob([text],{type}),name); }
+async function shareOrDownload(blob,filename,type){
+  try{
+    if(typeof File!=="undefined" && navigator.canShare){
+      const file=new File([blob],filename,{type});
+      if(navigator.canShare({files:[file]})){ await navigator.share({files:[file]}); return; }
+    }
+  }catch(e){ if(e&&e.name==="AbortError") return; }
+  downloadBlob(blob,filename);
+}
+
+/* ===== CSV / JSON ===== */
+function csvText(p){
+  const head=["区分","項目","状態","目標","写真枚数","採用枚数","料理名","価格","メモ","最終撮影日時"];
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const rows=p.items.map(s=>{
+    const phs=photosOfItem(s.id);
+    const last=phs.length?Math.max(...phs.map(x=>x.createdAt)):null;
+    return [s.cat,s.title,ST[s.status]||s.status,s.target||"",phs.length,phs.filter(x=>x.mark==="adopt"||x.mark==="fav").length,s.dish||"",s.price||"",s.notes||"",last?fmtDT(last):""].map(q).join(",");
+  });
+  return "﻿"+head.map(q).join(",")+"\n"+rows.join("\n");
+}
+function exportCSV(){ const p=getProject(); if(!p) return; download("撮影一覧_"+sanitizeName(p.title||"tabe")+".csv", csvText(p), "text/csv;charset=utf-8"); }
+function exportJSON(){ download("tabephoto-backup-"+today()+".json", JSON.stringify({version:1,exportedAt:new Date().toISOString(),projects},null,2), "application/json"); }
+document.getElementById("importJsonFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f) return;
+  try{
+    const d=JSON.parse(await f.text());
+    let list=[];
+    if(d&&Array.isArray(d.projects)) list=d.projects;
+    else if(d&&d.project&&d.project.items) list=[d.project];
+    else if(d&&Array.isArray(d.items)) list=[d];
+    if(!list.length){ showInfo("読み込める案件が見つかりませんでした。"); return; }
+    let added=0;
+    for(const raw of list){
+      if(!raw||!Array.isArray(raw.items)) continue;
+      const p=Object.assign({id:uid("project"),mode:"work",title:"",date:today(),place:"",tripName:"",mealType:"",companion:"",genre:"",notes:"",rating:0,revisit:"",impression:"",status:"active",createdAt:Date.now(),updatedAt:Date.now(),closingChecks:CLOSING_DEFAULTS.map((l,i)=>({id:"check_"+(i+1),label:l,done:false}))},raw);
+      p.id=uid("project"); p.createdAt=Date.now(); p.updatedAt=Date.now();
+      p.items=raw.items.map(s=>({id:uid("item"),cat:s.cat||"その他",title:s.title||"",priority:s.priority||"optional",status:ST[s.status]?s.status:"pending",target:s.target||"",notes:s.notes||"",dish:s.dish||"",price:s.price||""}));
+      await saveProject(p); added++;
+    }
+    showInfo(added?`${added}件の案件を読み込みました。写真は復元されません（写真込みの復元はZIP書き出し側の記録用です）。`:"読み込める案件が見つかりませんでした。");
+    go("home");
+  }catch(err){ showInfo("JSONの読み込みに失敗しました。ファイルを確認してください。"); }
+});
+
+/* ===== ZIP書き出し ===== */
+async function exportZIP(){
+  const p=getProject(); if(!p) return;
+  await loadPhotos(p.id);
+  const folderOf=mark=> mark==="adopt"||mark==="fav" ? "01_採用・お気に入り" : mark==="reject" ? "03_不採用" : "02_未確認";
+  const entries=[]; const photoMeta=[];
+  const perItemCount={};
+  const sorted=[...currentPhotos].sort((a,b)=>{ const ia=p.items.findIndex(x=>x.id===a.itemId), ib=p.items.findIndex(x=>x.id===b.itemId); return ia-ib||a.createdAt-b.createdAt; });
+  for(const ph of sorted){
+    perItemCount[ph.itemId]=(perItemCount[ph.itemId]||0)+1;
+    const name=photoFileName(p,ph,perItemCount[ph.itemId]);
+    const path=folderOf(ph.mark)+"/"+name;
+    entries.push({name:path, data:new Uint8Array(await ph.blob.arrayBuffer())});
+    photoMeta.push({id:ph.id,itemId:ph.itemId,file:path,mark:ph.mark,createdAt:ph.createdAt});
+  }
+  entries.push({name:"撮影一覧.csv", data:utf8Bytes(csvText(p))});
+  entries.push({name:"記録.json", data:utf8Bytes(JSON.stringify({version:1,exportedAt:new Date().toISOString(),note:"写真の実体はこのZIP内のフォルダにあります。このJSON単体では写真は復元されません。",project:p,photos:photoMeta},null,2))});
+  if(p.mode==="travel") entries.push({name:"日記.txt", data:utf8Bytes(buildDiary(p))});
+  const zipBytes=zipStore(entries,new Date());
+  const blob=new Blob([zipBytes],{type:"application/zip"});
+  await shareOrDownload(blob, sanitizeName((p.title||"tabephoto"))+"_"+(p.date||today()).replace(/-/g,"")+".zip", "application/zip");
+}
+
+/* ===== モーダル（confirm()は使わない） ===== */
+let modalCb=null;
+function showModal(text,okLabel,cb){
+  document.getElementById("modalText").textContent=text;
+  document.getElementById("modalOk").textContent=okLabel; modalCb=cb;
+  document.getElementById("modal").classList.add("open");
+}
+function showInfo(text){ showModal(text,"閉じる",null); }
+document.getElementById("modalCancel").onclick=()=>document.getElementById("modal").classList.remove("open");
+document.getElementById("modalOk").onclick=()=>{ document.getElementById("modal").classList.remove("open"); if(modalCb){ const cb=modalCb; modalCb=null; cb(); } };
+
+/* ===== 起動 ===== */
+(async()=>{
+  try{ projects=await idb.all("projects"); projects.forEach(p=>{ if(!Array.isArray(p.items)) p.items=[]; }); }
+  catch(e){ projects=[]; }
+  view={name:"home",projectId:null,filter:"all"};
+  render();
+  if(!projects.length && !idb.db){ app.innerHTML='<div class="card warnbox">データベースを開けませんでした。Safariの通常モード（プライベートブラウズ以外）で開き直してください。</div>'; }
+})();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>

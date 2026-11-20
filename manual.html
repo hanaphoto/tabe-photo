@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b3a29">
+<title>説明書｜たべフォト</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--main:#5b3a29;--accent:#c96f3b;--bg:#fbf5ef;--card:#fff;--text:#2b211b;--muted:#8a7462;--line:#ecdccd;--green:#1e9e62;--yellow:#e6a817;--gray:#9aa0a6;--red:#d64545;--purple:#7a5aa0;--navy:#122a42}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);line-height:1.75}
+header{background:var(--main);color:#fff;padding:22px 16px}header.inner,main{max-width:760px;margin:0 auto}header h1{font-size:22px;margin:0}header p{margin:4px 0 0;opacity:.85;font-size:14px}
+main{padding:16px 14px 60px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 10px;border-left:5px solid var(--accent);padding-left:10px}h3{font-size:16px;margin:16px 0 6px}
+p,li{font-size:15px}ul,ol{padding-left:22px;margin:6px 0}table{border-collapse:collapse;width:100%;margin:8px 0;font-size:14px}th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}th{background:#f7ece1}
+.st{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;color:#fff}.st.pending{background:var(--gray)}.st.shot{background:var(--yellow)}.st.confirmed{background:var(--green)}.st.retake{background:var(--red)}.st.skip{background:var(--purple)}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;border-radius:12px;background:var(--main);color:#fff;text-decoration:none;font-weight:700}
+.muted{color:var(--muted);font-size:14px}.warn{background:#fdf0ef;border:1px solid #f0c4c0;border-radius:10px;padding:10px 14px;font-size:14px}
+code{background:#f7ece1;padding:1px 6px;border-radius:6px;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="inner"><h1>たべフォト｜説明書</h1><p>食事処の撮影（業務）も、旅先の食の記録も。カメラ付きチェックリストアプリの使い方</p></div></header>
+<main>
+
+<div class="card">
+<h2>1. このアプリについて</h2>
+<p>「たべフォト」は、<strong>アプリの中でカメラ撮影まで完結</strong>し、<strong>何を撮ったかが項目リストで分かる</strong>スマホ向けアプリです。飲食店を撮る仕事にも、旅行先で食べたものを記録する使い方にも対応するため、案件ごとに2つのモードがあります。</p>
+<table>
+<tr><th>モード</th><th>向いている使い方</th><th>特徴</th></tr>
+<tr><td>業務モード（紺テーマ）</td><td>飲食店の撮影仕事、メニュー・店舗写真の納品</td><td>必須／推奨／任意の優先度、目標枚数、写真の採用・不採用の選別、撮影終了チェック、納品向けファイル名のZIP書き出し</td></tr>
+<tr><td>旅記録モード（暖色テーマ）</td><td>旅行・外食の思い出記録</td><td>料理名・価格・星評価・再訪したいか・感想を記録し、文章化した「日記テキスト」を書き出せる</td></tr>
+</table>
+<ul>
+<li>ログイン不要、インターネット不要（オフラインで動きます）</li>
+<li>入力したデータと写真は<strong>この端末の中だけ</strong>に保存され、外部へ送信されることはありません</li>
+<li>位置情報は使いません。場所は住所などのテキストで記録します</li>
+</ul>
+<p><a class="btn" href="./index.html">アプリを開く</a></p>
+</div>
+
+<div class="card">
+<h2>2. 始め方（iPhone）</h2>
+<ol>
+<li>Safariで <code>https://hanaphoto.github.io/tabe-photo/</code> を開く</li>
+<li>共有ボタン（□に↑）→「ホーム画面に追加」を選ぶ</li>
+<li>ホーム画面の「たべフォト」アイコンから開く（次からはオフラインでも開けます）</li>
+<li>最初にカメラを使う時、カメラの許可を求められます。「許可」を選んでください</li>
+</ol>
+<p class="muted">Androidの場合は Chrome のメニューから「ホーム画面に追加」／「アプリをインストール」です。</p>
+<div class="warn"><strong>大切な注意：</strong>データと写真は、ホーム画面に追加したアプリ（またはSafari）の保存領域（IndexedDB）に入ります。Safariの「履歴とWebサイトデータを消去」をするとデータも写真も消えます。大事な撮影の後は、必ず§7のZIP書き出しでバックアップを取ってください。</div>
+</div>
+
+<div class="card">
+<h2>3. 業務モードの流れ</h2>
+<ol>
+<li>案件一覧で「＋ 業務撮影の案件」を押す</li>
+<li>店名・日付・場所を入れて保存する。外観／店内／料理／メニュー／人物・その他の定番項目が自動で入ります</li>
+<li>項目を現場に合わせて追加・編集・削除し、↑↓で並べ替える。各項目に優先度（必須／推奨／任意）と目標枚数を付ける</li>
+<li>項目一覧で「カメラで撮る」を押して撮影する。撮った写真は自動でその項目に付き、項目は「撮影済み」になります</li>
+<li>写真をタップすると大きく見られます。その場で「採用／お気に入り／不採用／未確認」の印を付ける</li>
+<li>終わったら「撮影終了チェック」で、必須の未撮影・撮り直し・未確認写真の残りを確認し、ZIPで書き出す</li>
+</ol>
+<h3>項目の状態（5段階）</h3>
+<table>
+<tr><th>状態</th><th>意味</th></tr>
+<tr><td><span class="st pending">未撮影</span></td><td>まだ撮っていない</td></tr>
+<tr><td><span class="st shot">撮影済み</span></td><td>写真が1枚以上ある（カメラ撮影・取り込みで自動的になります）</td></tr>
+<tr><td><span class="st confirmed">確認OK</span></td><td>写真を見て、使えることを確認した</td></tr>
+<tr><td><span class="st retake">撮り直し</span></td><td>もう一度撮る必要がある</td></tr>
+<tr><td><span class="st skip">対象外</span></td><td>今回は撮らないと決めた</td></tr>
+</table>
+<p>項目一覧の状態バッジを押すと、この順番で切り替わります。フィルターは「すべて／未撮影／撮り直し」です。</p>
+<h3>最初に入る項目（業務テンプレート）</h3>
+<table>
+<tr><th>カテゴリ</th><th>主な項目</th></tr>
+<tr><td>外観</td><td>店舗正面（看板含む）、入口・看板ロゴ、斜め前からの外観</td></tr>
+<tr><td>店内</td><td>店内全景（入口側）、店内全景（奥側）、カウンター席、テーブル席、個室・座敷、内装・装飾</td></tr>
+<tr><td>料理</td><td>看板料理、おすすめ料理、定食・セット全体、料理アップ（寄り）、ドリンク、デザート、季節限定</td></tr>
+<tr><td>メニュー</td><td>メニュー表紙、メニュー各ページ、価格表・案内</td></tr>
+<tr><td>人物・その他</td><td>店主・スタッフ、調理風景、SNS用縦構図、横構図（バナー用余白）</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>4. 旅記録モードの流れ</h2>
+<ol>
+<li>案件一覧で「＋ 旅記録を追加」を押す</li>
+<li>店名・日付・場所のほか、旅行名・食事区分（朝／昼／夕／間食）・同行者（選択式）を入れる</li>
+<li>項目は「お店」「食事」「思い出」のシンプルなセットが入ります（必須はありません）。項目ごとに料理名と価格を記録できます</li>
+<li>食べたら写真を撮り、星評価（1〜5）・再訪（ぜひ／迷う／なし）・感想を付ける</li>
+<li>「日記を見る」で、記録が文章化された日記テキストを表示。コピーや.txt ダウンロード、ZIP書き出し（日記.txt入り）ができます</li>
+</ol>
+<p>日記には、旅行名／店名／日付／食事区分／食べたもの／合計金額（価格の自動合計）／評価／再訪／感想が入ります。ブログやSNSの下書きにもそのまま使えます。</p>
+</div>
+
+<div class="card">
+<h2>5. カメラと写真の保存</h2>
+<ul>
+<li>カメラ画面では、現在の項目名・カテゴリ・撮影枚数（目標枚数つき）が表示されます</li>
+<li>グリッド表示の切り替え、前後カメラの切り替え、大きなシャッター、直近に撮った写真のサムネイル表示があります</li>
+<li>連続して撮れるので、同じ項目で何枚も撮影できます。「次の未撮影へ」で項目を移動できます</li>
+<li>撮影した写真は、保存が成功してから初めて項目が「撮影済み」になります（保存に失敗した写真が「撮ったこと」にはなりません）</li>
+<li>カメラが使えない環境（許可しない場合など）では、項目ごとの「写真を取り込む」から写真アプリの写真を取り込めます。これも同じく「撮影済み」になります</li>
+</ul>
+<h3>写真ビューア</h3>
+<p>サムネイルをタップすると写真を大きく表示します。前後の写真への移動、採用／お気に入り／不採用／未確認の切り替え、1枚だけのダウンロード、削除ができます。</p>
+</div>
+
+<div class="card">
+<h2>6. 画質についての注意（大切）</h2>
+<ul>
+<li>このアプリのカメラは、ブラウザの仕組み（Webカメラ）で撮影します。写真の長辺は最大1920px、JPEG画質0.92で保存します</li>
+<li><strong>iPhone標準カメラアプリのような高画質・高画素ではありません。</strong>記録用・Web掲載用・確認用には十分ですが、大きく印刷する納品写真などは一眼カメラや標準カメラアプリで撮ってください</li>
+<li>撮影情報（EXIF：撮影日時・レンズ情報・GPSなど）は<strong>基本的に残りません</strong>。アプリ内には撮影日時が記録されますが、書き出したJPEG自体にEXIFが入ることは期待しないでください</li>
+<li>ズームや細かい露出調整はブラウザ側の仕様に依存します。対応していない端末では使えません</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>7. 書き出しとバックアップ</h2>
+<table>
+<tr><th>形式</th><th>中身</th><th>用途</th></tr>
+<tr><td>ZIP書き出し（写真込み）</td><td>写真を <code>01_採用・お気に入り</code>／<code>02_未確認</code>／<code>03_不採用</code> にフォルダ分け＋撮影一覧.csv＋記録.json（旅記録は日記.txtも）</td><td><strong>バックアップと納品の本命。</strong>ファイル名は <code>YYYYMMDD_項目連番_項目名_枚番.jpg</code></td></tr>
+<tr><td>CSV書き出し</td><td>区分・項目・状態・目標・写真枚数・採用枚数・料理名・価格・メモ・最終撮影日時</td><td>記録用。Excelやスプレッドシート、Notionへの取り込みに</td></tr>
+<tr><td>JSON書き出し／読み込み</td><td>案件情報と項目だけ（<strong>写真は含まれません</strong>）</td><td>項目リストの使い回し、端末間の案件移行に。読み込むと既存の案件を消さずに追加されます</td></tr>
+<tr><td>日記.txt（旅記録）</td><td>文章化した食の記録</td><td>ブログ・SNS・日記の下書きに</td></tr>
+</table>
+<p>共有シートが使える端末では、ZIP書き出しで共有シートが開きます（ファイルアプリやAirDropへ送れます）。使えない場合はダウンロードになります。</p>
+<div class="warn"><strong>バックアップ推奨：</strong>写真は端末の中にしかありません。撮影が終わったら、その日のうちにZIP書き出しをして、パソコンやクラウドへ移してください。JSONだけでは写真は戻りません。</div>
+</div>
+
+<div class="card">
+<h2>8. 撮影終了チェック（業務モード）</h2>
+<p>必須項目の未撮影件数、撮り直しの件数、未確認（印が付いていない）写真の枚数が表示され、残りがあれば警告が出ます。あわせて次の4項目を確認します。</p>
+<ol>
+<li>必須カット完了</li>
+<li>写真を確認した</li>
+<li>店名表記を確認した</li>
+<li>書き出し（ZIP）を済ませた</li>
+</ol>
+<p>残りがあるまま案件を完了にしようとすると、確認画面が出ます。</p>
+</div>
+
+<div class="card">
+<h2>9. 案件の複製</h2>
+<p>同じお店の再撮影や、同じ旅行パターンの記録では、案件一覧の「複製」が便利です。項目リストやメモは引き継がれ、状態はすべて「未撮影」に戻ります。<strong>写真は複製されません。</strong></p>
+</div>
+
+<div class="card">
+<h2>10. データとプライバシー</h2>
+<ul>
+<li>データと写真の保存先は端末内の IndexedDB だけです。サーバー送信、アクセス解析、広告は一切ありません</li>
+<li>位置情報は取得しません。カメラの映像も端末の中で処理され、外部へ送られません</li>
+<li>アプリのコード自体に個人情報は含まれていません。公開されているのは「空のアプリ」だけです</li>
+<li>店名や住所をどこまで入れるかは運用次第です。端末のパスコードがそのまま守りになります</li>
+<li>機種変更の前には、案件ごとにZIP書き出しをしてください（JSONでは写真が移りません）</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>11. よくある質問・困った時</h2>
+<h3>カメラが起動しない</h3>
+<p>カメラの許可が必要です。Safariの設定でこのサイトのカメラ許可を確認するか、ホーム画面アプリを一度開き直してください。それでも使えない場合は、標準カメラで撮ってから「写真を取り込む」で取り込めます。</p>
+<h3>データや写真が消えた</h3>
+<p>Safariのデータを消去した、プライベートブラウズで使っていた、別のブラウザで開いた、などが原因として考えられます。ZIPバックアップがあれば写真は戻せますが、アプリ内への自動復元はできません（ZIPは保管・納品用です）。</p>
+<h3>オフラインで使える？</h3>
+<p>使えます。一度オンラインで開けば、本体が端末に保存され、圏外でも撮影・記録ができます。</p>
+<h3>iPhone Safariで入力欄を押すと画面が拡大する</h3>
+<p>入力欄の文字サイズを16pxにして防いでいます。もし拡大する場合は、ピンチで戻してください。</p>
+<h3>写真が保存できない</h3>
+<p>端末の空き容量不足の可能性があります。不要な写真を削除するか、ZIPで書き出してからアプリ内の案件を削除してください。</p>
+</div>
+
+<div class="card">
+<h2>12. バージョン</h2>
+<p>v1.0（2026-11-20）初版。アプリ本体：<a href="./index.html">たべフォト</a>／ソース：github.com/hanaphoto/tabe-photo</p>
+<p class="muted">この説明書はアプリと同じ場所で公開されています（manual.html）。アプリの「説明書」リンクからいつでも開けます。</p>
+</div>
+
+</main>
+</body>
+</html>
